@@ -4,7 +4,7 @@
 #include <utility>
 #include "mmap_file.h"
 
-int map_file()
+int map_file() // kinda useless rn
 {
     const std::filesystem::path file_path = "src/loader/test.txt";
     MmapFile mmapfile { file_path };
