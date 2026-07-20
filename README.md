@@ -33,14 +33,13 @@ python scripts/parity.py --model models/qwen2.5-0.5b-instruct --out parity_data
 Expected output: `parity_data/` containing `prompt00..19_logits.npy`
 (float32, `[128, vocab]`, ~1.5 GB total)
 
-
 ## Build for debug
 
 `/third_party` folder used to manage libraries.
 
 ```bash
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
-ctest --test-dir build
-./build/inferno
+cmake --build build-debug
+ctest --test-dir build-debug
+./build-debug/inferno
 ```

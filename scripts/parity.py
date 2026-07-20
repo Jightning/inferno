@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 For each of 20 prompts, runs decoding and writes logits and the token id sequence to --out:
 

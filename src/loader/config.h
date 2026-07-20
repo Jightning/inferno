@@ -66,4 +66,4 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ModelConfig,
     vocab_size
 )
 
-ModelConfig load_config(const std::string&);
+ModelConfig load_config(const std::string& relative_path);

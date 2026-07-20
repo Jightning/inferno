@@ -23,3 +23,5 @@ struct SafeTensorModel {
 
     SafeTensorModel(const std::string& filepath): mmap_file{filepath}{}
 };
+
+SafeTensorModel load_safetensors(const std::string& filepath);

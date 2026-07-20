@@ -27,7 +27,7 @@ static void validate(ModelConfig config) {
 
 ModelConfig load_config(const std::string& relative_path) {
     std::ifstream config_file(relative_path);
-    
+
     if (!config_file.is_open()) {
         throw std::runtime_error("Could not open config file.");
     }

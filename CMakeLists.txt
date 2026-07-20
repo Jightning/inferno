@@ -32,13 +32,12 @@ configure_file(
 )
 
 # Phase 1+ sources get appended here as components land (loader/, model/, ...).
+# Everything but main.cpp, so the test binary can link the same objects.
 set(INFERNO_SOURCES
-    # src
-    src/main.cpp
     src/loader/config.cpp
     src/loader/mmap_file.cpp
 )
-add_executable(inferno ${INFERNO_SOURCES})
+add_executable(inferno src/main.cpp ${INFERNO_SOURCES})
 target_include_directories(inferno SYSTEM PRIVATE ${THIRD_PARTY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 enable_testing()
@@ -46,6 +45,7 @@ add_executable(inferno_tests
     tests/test_smoke.cpp
     tests/loader/config.cpp
     tests/loader/mmap_file.cpp
+    ${INFERNO_SOURCES}
 )
 target_include_directories(inferno_tests PRIVATE src)
 target_include_directories(inferno_tests SYSTEM PRIVATE ${THIRD_PARTY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
