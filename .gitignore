@@ -1,0 +1,9 @@
+build*/
+.venv/
+models/
+parity_data/
+*.npy
+__pycache__/
+.cache/
+docs/
+.claude/
