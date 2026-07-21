@@ -1,31 +1,32 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
+#pragma once
+
+#include <span>
 #include <string>
-#include <cstdint>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
 
 #include "safetensors.h"
+#include "config.h"
 
 class Weights {
-    // Owns the numbers: one fp32 vector per tensor, converted from BF16 in the
-    // constructor. After conversion the mmap is no longer needed — Weights owns
-    // its own data.
     std::unordered_map<std::string, std::vector<float>> data_;
 public:
-    // Takes ownership of the parsed file; validates every shape against ref §18's
-    // table (INFERNO_CHECK, naming the tensor) BEFORE converting, then converts.
-    Weights(SafeTensorModel&& st, const ModelConfig& cfg);
+    // Takes ownership of the parsed file; validates every tensor against the
+    // config-derived shape table BEFORE converting, then converts BF16 -> fp32.
+    Weights(SafeTensorModel&& safetensors_in, const ModelConfig& config);
+    Weights(const Weights&) = delete;
 
-    // Generic path: quantizer (M11), tests, debugging.
-    std::span<const float> tensor(std::string_view name) const;
+    std::span<const float> get_tensor(std::string_view name) const;
 
-    // Hot path: filled once in the constructor, from the same storage.
+    // Layer Weights gotten from _data
     struct LayerWeights {
-        std::span<const float> wq, bq, wk, bk, wv, bv, wo,   // attention
-                               w_gate, w_up, w_down,          // MLP
-                               ln1, ln2;                      // the two rmsnorm weights
+        std::span<const float> qw, qb, kw, kb, vw, vb, ow, // attention
+                               gate_w, up_w, down_w, // mlp
+                               ln1, ln2;  // rmsnorm weights
     };
+
     std::vector<LayerWeights> layers;      // [24]
-    std::span<const float> embed_tokens;   // [151936×896] — embedding AND LM head (tied)
-    std::span<const float> final_norm;     // model.norm.weight, [896]
+    std::span<const float> embed_tokens;   // [151936×896] embedding and head (tied)
+    std::span<const float> final_norm;     // model.norm.weight [896]
 };

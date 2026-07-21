@@ -36,8 +36,11 @@ configure_file(
 set(INFERNO_SOURCES
     src/loader/config.cpp
     src/loader/mmap_file.cpp
+    src/loader/safetensors.cpp
+    src/loader/weights.cpp
 )
 add_executable(inferno src/main.cpp ${INFERNO_SOURCES})
+target_include_directories(inferno PRIVATE src)
 target_include_directories(inferno SYSTEM PRIVATE ${THIRD_PARTY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 enable_testing()
@@ -45,8 +48,13 @@ add_executable(inferno_tests
     tests/test_smoke.cpp
     tests/loader/config.cpp
     tests/loader/mmap_file.cpp
+    tests/loader/weights.cpp
     ${INFERNO_SOURCES}
 )
+# The integration smoke test needs the real checkpoint, which lives in the source
+# tree; ctest runs from the build tree. It skips itself if the model is absent.
+target_compile_definitions(inferno_tests PRIVATE
+    INFERNO_MODEL_DIR="${CMAKE_SOURCE_DIR}/models/qwen2.5-0.5b-instruct")
 target_include_directories(inferno_tests PRIVATE src)
 target_include_directories(inferno_tests SYSTEM PRIVATE ${THIRD_PARTY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME inferno_tests COMMAND inferno_tests)

@@ -18,10 +18,11 @@ struct SafeTensor {
 
 struct SafeTensorModel {
     MmapFile mmap_file;
+    size_t data_start = 0;
     std::unordered_map<std::string, SafeTensor> tensors;
     std::unordered_map<std::string, std::string> metadata;
 
-    SafeTensorModel(const std::string& filepath): mmap_file{filepath}{}
+    SafeTensorModel(const std::string& filepath): mmap_file{ filepath }{}
 };
 
 SafeTensorModel load_safetensors(const std::string& filepath);

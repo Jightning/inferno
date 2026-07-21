@@ -12,8 +12,10 @@ SafeTensorModel load_safetensors(const std::string& filepath) {
     const char* json_start = reinterpret_cast<const char*>(model.mmap_file.get_data() + 8);
     auto json_header = nlohmann::json::parse(json_start, json_start + header_size);
 
-    // Populate an object with each tensor
-    for (auto& [tensor_name, tensor_info] : json_header.items()) {
+    model.data_start = 8 + header_size;
+
+    // Populate a map with each tensor (in BF16)
+    for (const auto& [tensor_name, tensor_info] : json_header.items()) {
         if (tensor_name == "__metadata__") {
             model.metadata = tensor_info.get<std::unordered_map<std::string, std::string>>();
             continue;
