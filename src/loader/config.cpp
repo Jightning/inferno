@@ -35,7 +35,7 @@ ModelConfig load_config(const std::string& relative_path) {
     json config_json;
     try {
         config_file >> config_json;
-    }catch (const json::parse_error& e) {
+    } catch (const json::parse_error& e) {
         throw std::runtime_error("Malformed JSON syntax: " + std::string(e.what()));
     }
 
