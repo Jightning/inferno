@@ -6,4 +6,3 @@ parity_data/
 __pycache__/
 .cache/
 docs/
-.claude/

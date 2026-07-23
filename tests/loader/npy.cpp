@@ -8,8 +8,6 @@
 
 #include "loader/npy.h"
 
-const std::string PARITY_DATA_DIR = "/parity_data";
-
 namespace {
 
 class TempFile {
@@ -205,6 +203,7 @@ TEST_CASE("The typed loaders return the payload and reject the wrong dtype") {
     CHECK_THROWS_AS(load_npy_f32(ints.path()), std::runtime_error);
 }
 
+#ifdef PARITY_DATA_DIR
 TEST_CASE("load_npy reads the parity fixtures M3 checks against") {
     const std::filesystem::path dir = PARITY_DATA_DIR;
     const std::filesystem::path tokens = dir / "prompt00_tokens.npy";
@@ -227,3 +226,4 @@ TEST_CASE("load_npy reads the parity fixtures M3 checks against") {
     REQUIRE(scores.f32.size() == 128u * 151936u);
     CHECK(scores.f32[0] == doctest::Approx(7.548954f));
 }
+#endif
