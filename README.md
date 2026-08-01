@@ -1,6 +1,6 @@
 # Inferno
 
-An LLM inference engine C++ using CPU only built from scratch. It loads open-weight models (ex. Qwen2.5-0.5B) and optimizes using the following: correct fp32 baseline -> KV cache -> int8/int4 quantization -> multithreading -> AVX2 SIMD.
+An LLM inference engine C++ using CPU only built from scratch. It loads open-weight models (ex. Qwen2.5-0.5B) and optimizes using the following: loading weights as fp32 -> KV cache -> int8/int4 quantization -> multithreading -> AVX2 SIMD.
 
 ## Python
 
@@ -30,6 +30,12 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
 cmake --build build-debug
 ctest --test-dir build-debug
 ./build-debug/inferno
+```
+
+For more verbose debugging:
+
+```bash
+./build-debug/inferno_tests --reporter compact --success
 ```
 
 ## Download for Qwen2.5-0.5B-Instruct
