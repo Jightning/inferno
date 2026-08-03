@@ -34,10 +34,13 @@ set(INFERNO_SOURCES
     src/loader/safetensors.cpp
     src/loader/weights.cpp
     src/loader/npy.cpp
+
     src/tokenizer/byte_unicode.cpp
     src/tokenizer/pretokenize.cpp
     src/tokenizer/bpe.cpp
     src/tokenizer/tokenizer.cpp
+
+    src/kernels/kernels.cpp
 )
 add_executable(inferno src/main.cpp ${INFERNO_SOURCES})
 target_include_directories(inferno PRIVATE src)
@@ -54,6 +57,7 @@ add_executable(inferno_tests
     tests/tokenizer/pretokenize.cpp
     tests/tokenizer/bpe.cpp
     tests/tokenizer/tokenizer.cpp
+    tests/kernels/kernels.cpp
     ${INFERNO_SOURCES}
 )
 
