@@ -2,10 +2,14 @@
 
 #include <span>
 
-// y (size m) = weights (size m x n) * X (size n) + bias
+// y (size m) = weights (size m x n) * x (size n) + bias
 // weights is a flattened m x n array with each row placed side by side
 // bias is a size m list or a nullptr if there are none
+// sizes come from the spans and are checked; y must not alias x or weights
 void linear(std::span<float> y, std::span<const float> x, std::span<const float> weights, const float* bias);
 
-// 
-void rmsnorm(std::span<float> y, std::span<const float> x, std::span<const float> w, float eps);
+// y_i = weights_i * x_i / sqrt(mean(x^2) + eps)
+void rmsnorm(std::span<float> y, std::span<const float> x, std::span<const float> weights, float eps);
+
+// x_i = exp(x_i - max) / sum(exp(x - max))
+void softmax(std::span<float> x); 

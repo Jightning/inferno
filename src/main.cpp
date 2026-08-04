@@ -1,9 +1,15 @@
 #include <cstdio>
+#include <array>
 #include <cstring>
 #include <iostream>
+#include <vector>
+#include <span>
+
 #include "loader/config.h"
 #include "loader/mmap_file.h"
 #include "loader/npy.h"
+#include "kernels/kernels.h"
+
 namespace {
 
 void print_usage() {
@@ -29,8 +35,7 @@ int main(int argc, char** argv) {
         ModelConfig config { load_config("models/qwen2.5-0.5b-instruct/config.json") };
         std::cout << "Config Loaded\n";
     } else if (std::strcmp(cmd, "test") == 0) {
-        std::string path { "parity_data/prompt00_logits.npy" };
-        load_npy(path);
+        std::cout << '\n';
     } else {
         std::fprintf(stderr, "inferno: unknown command '%s'\n\n", cmd);
         return 1;
