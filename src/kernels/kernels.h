@@ -13,3 +13,7 @@ void rmsnorm(std::span<float> y, std::span<const float> x, std::span<const float
 
 // x_i = exp(x_i - max) / sum(exp(x - max))
 void softmax(std::span<float> x); 
+
+// Rotate one head's vector in place for absolute position `pos`.
+// vec.size() must be even (64 here); pairs element j with element j + n/2.
+void rope(std::span<float> vec, size_t pos, float theta);

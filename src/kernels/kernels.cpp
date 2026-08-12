@@ -67,3 +67,16 @@ void softmax(std::span<float> x) {
         x[i] *= inv_sum;
     }
 }
+
+void rope(std::span<float> vec, size_t pos, float theta) {
+    /*
+        for j in 0 .. 31:
+            angle = pos * theta^(-2j / 64)
+            out[j] = x[j] * cos(angle) - x[j+32] * sin(angle)
+            out[j+32] = x[j+32] * cos(angle) + x[j] * sin(angle)
+    */
+
+    for (size_t i = 0; i < 31; ++i) {
+        
+    }
+}
