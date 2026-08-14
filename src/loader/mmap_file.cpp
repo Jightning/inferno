@@ -9,7 +9,6 @@ int map_file() // kinda useless rn
     const std::filesystem::path file_path = "src/loader/test.txt";
     MmapFile mmapfile { file_path };
     const char* data { mmapfile.get_data() };
-    std::span<const std::byte> { mmapfile.get_bytes() };
 
     /* Now do something with the information. */
     for (std::size_t i = 0; i < mmapfile.get_size(); i++) {

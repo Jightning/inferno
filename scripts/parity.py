@@ -55,12 +55,15 @@ def main():
     model.eval()
 
     args.out.mkdir(parents=True, exist_ok=True)
-    
+
     for i, prompt in enumerate(PROMPTS):
 
-        input_ids = tokenizer(prompt, return_tensors="pt").input_ids # [batch_size, seq_len]
+        encoding = tokenizer(prompt, return_tensors="pt")
+        input_ids = encoding.input_ids # [batch_size, seq_len]
         result = model.generate( # pyright: ignore[reportAttributeAccessIssue]
             input_ids,
+            attention_mask=encoding.attention_mask,
+            pad_token_id=tokenizer.eos_token_id,
             max_new_tokens=args.n_tokens,
             min_new_tokens=args.n_tokens,
             do_sample=False,

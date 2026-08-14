@@ -69,14 +69,42 @@ void softmax(std::span<float> x) {
 }
 
 void rope(std::span<float> vec, size_t pos, float theta) {
-    /*
-        for j in 0 .. 31:
-            angle = pos * theta^(-2j / 64)
-            out[j] = x[j] * cos(angle) - x[j+32] * sin(angle)
-            out[j+32] = x[j+32] * cos(angle) + x[j] * sin(angle)
-    */
+    INFERNO_CHECK(vec.size() % 2 == 0, "rope: vector size must be even");
 
-    for (size_t i = 0; i < 31; ++i) {
-        
+    const size_t half = vec.size() / 2;
+    const float dim = static_cast<float>(vec.size());
+
+    for (size_t i = 0; i < half; ++i) {
+        float angle { pos * std::pow(theta, -2.0f * static_cast<float>(i) / dim) };
+        float cos_a { std::cos(angle) };
+        float sin_a { std::sin(angle) };
+        float v0 { vec[i] };
+        float v1 { vec[i + half] };
+
+        vec[i] = v0 * cos_a - v1 * sin_a;
+        vec[i + half] = v1 * cos_a + v0 * sin_a;
     }
+}
+
+void silu_mul(std::span<float> gate, std::span<const float> up) {
+    INFERNO_CHECK(gate.size() == up.size(), "silu_mul: gate and up must have the same size");
+
+    size_t n = gate.size();
+    for (size_t i = 0; i < n; ++i) {
+        float z = gate[i];
+        gate[i] = z / (1.0f + std::exp(-z)) * up[i];
+    }
+}
+
+size_t argmax(std::span<const float> x) {
+    INFERNO_CHECK(!x.empty(), "argmax: x must not be empty");
+
+    size_t maxx = 0;
+    for (size_t i = 1; i < x.size(); ++i) {
+        if (x[i] > x[maxx]) maxx = i;
+    }
+
+    // for nan stuff
+    INFERNO_CHECK(std::isfinite(x[maxx]), "argmax: best element is not finite");
+    return maxx;
 }

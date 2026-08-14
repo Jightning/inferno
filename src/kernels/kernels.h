@@ -14,6 +14,12 @@ void rmsnorm(std::span<float> y, std::span<const float> x, std::span<const float
 // x_i = exp(x_i - max) / sum(exp(x - max))
 void softmax(std::span<float> x); 
 
-// Rotate one head's vector in place for absolute position `pos`.
-// vec.size() must be even (64 here); pairs element j with element j + n/2.
+// Rotate vec based on pos and theta
+// For positional encoding, vec size must be even
 void rope(std::span<float> vec, size_t pos, float theta);
+
+// gate_i = silu(gate_i) * up_i, where silu(z) = z / (1 + e^-z)
+void silu_mul(std::span<float> gate, std::span<const float> up);
+
+// Index of max
+size_t argmax(std::span<const float> x);
