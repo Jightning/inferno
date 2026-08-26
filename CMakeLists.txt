@@ -41,6 +41,8 @@ set(INFERNO_SOURCES
     src/tokenizer/tokenizer.cpp
 
     src/kernels/kernels.cpp
+
+    src/model/model.cpp
 )
 add_executable(inferno src/main.cpp ${INFERNO_SOURCES})
 target_include_directories(inferno PRIVATE src)

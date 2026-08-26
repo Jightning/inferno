@@ -36,7 +36,7 @@ struct ModelConfig
     int eos_token_id {}; // End of sequence token id
 
     int get_head_dim() const { return hidden_size / num_attention_heads; }; // ndims for each attention head 
-    int get_gqa_groups() const { return num_attention_heads / num_key_value_heads; }; // Number of GQA groups
+    int get_gqa_group_heads() const { return num_attention_heads / num_key_value_heads; }; // Number of GQA group heads
 };
 
 // for validation

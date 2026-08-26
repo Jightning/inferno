@@ -109,7 +109,7 @@ TEST_CASE("load_config accepts a valid config") {
     CHECK(config.eos_token_id == 151645);
 
     CHECK(config.get_head_dim() == 64);
-    CHECK(config.get_gqa_groups() == 7);
+    CHECK(config.get_gqa_group_heads() == 7);
 }
 
 TEST_CASE("load_config rejects a missing required field") {
