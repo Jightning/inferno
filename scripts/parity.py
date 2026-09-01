@@ -42,12 +42,52 @@ PROMPTS = [
 
 LOGIT_TOLERANCE = 1e-3  # max abs diff gate for the fp32 rung
 
+
+def dump_intermediates(model, tokenizer, out: Path) -> None:
+    """M6 step 0: hidden state at four points of prompt 0's forward pass, via
+    forward hooks, so a block-0 bug and a final-norm bug can't be confused."""
+    dumps = {}
+
+    def save(name):
+        def hook(module, args, output):
+            # transformers 5.x: DecoderLayer returns a bare Tensor.
+            # 4.x returned a tuple -- handle both so this survives an upgrade.
+            t = output[0] if isinstance(output, tuple) else output
+            dumps[name] = t.detach()[0].float().numpy()  # [seq, hidden]
+        return hook
+
+    handles = [
+        model.model.embed_tokens.register_forward_hook(save("embed")),
+        model.model.layers[0].register_forward_hook(save("block0")),
+        model.model.layers[1].register_forward_hook(save("block1")),
+        model.model.norm.register_forward_hook(save("final_norm")),
+    ]
+
+    encoding = tokenizer(PROMPTS[0], return_tensors="pt")
+    model(encoding.input_ids, attention_mask=encoding.attention_mask)  # one forward, no generate()
+
+    for handle in handles:
+        handle.remove()
+
+    for name, arr in dumps.items():
+        np.save(out / f"prompt00_{name}.npy", arr)
+    print(f"wrote intermediates for prompt00: {sorted(dumps.keys())} to {out}/")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default="models/qwen2.5-0.5b-instruct", help="HF model id or local path (default: %(default)s)")
     parser.add_argument("--out", type=Path, default=Path("parity_data"), help="output directory (default: %(default)s)")
     parser.add_argument("--n-tokens", type=int, default=128, help="greedy tokens to generate per prompt (default: %(default)s)")
+    parser.add_argument("--prompts", type=int, default=len(PROMPTS),
+                         help="only dump the first N prompts -- for a fast CI smoke rather than "
+                              "the full 20 (default: %(default)s)")
+    parser.add_argument("--dump-intermediates", action="store_true",
+                         help="also dump prompt 0's embed/block0/block1/final_norm activations "
+                              "for M6's checkpoints (default: %(default)s)")
     args = parser.parse_args()
+
+    prompts = PROMPTS[:args.prompts]
 
     torch.set_grad_enabled(False)
     tokenizer = AutoTokenizer.from_pretrained(args.model)
@@ -56,7 +96,10 @@ def main():
 
     args.out.mkdir(parents=True, exist_ok=True)
 
-    for i, prompt in enumerate(PROMPTS):
+    if args.dump_intermediates:
+        dump_intermediates(model, tokenizer, args.out)
+
+    for i, prompt in enumerate(prompts):
 
         encoding = tokenizer(prompt, return_tensors="pt")
         input_ids = encoding.input_ids # [batch_size, seq_len]
@@ -82,7 +125,7 @@ def main():
 
         np.save(args.out / f"prompt{i:02d}_logits.npy", logits)
         np.save(args.out / f"prompt{i:02d}_tokens.npy", output_ids)
-        print(f"[{i + 1:2d}/{len(PROMPTS)}] {len(output_ids)} ids, logits {logits.shape}: {prompt[:50]!r}")
+        print(f"[{i + 1:2d}/{len(prompts)}] {len(output_ids)} ids, logits {logits.shape}: {prompt[:50]!r}")
 
     manifest = {
         "model": args.model,
@@ -90,11 +133,11 @@ def main():
         "logit_tolerance": LOGIT_TOLERANCE,
         "vocab_size": model.config.vocab_size,
         "chat_template": False,
-        "prompts": PROMPTS,
+        "prompts": prompts,
     }
 
     (args.out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    print(f"wrote {len(PROMPTS)} prompt dumps + manifest.json to {args.out}/")
+    print(f"wrote {len(prompts)} prompt dumps + manifest.json to {args.out}/")
 
 
 if __name__ == "__main__":

@@ -2,6 +2,10 @@ name: CI
 
 on: [push, pull_request]
 
+env:
+  MODEL_ID: Qwen/Qwen2.5-0.5B-Instruct
+  MODEL_DIR: models/qwen2.5-0.5b-instruct
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -16,3 +20,38 @@ jobs:
         run: cmake --build build --parallel
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+  parity-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache the HF checkpoint
+        id: model-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.MODEL_DIR }}
+          key: model-${{ env.MODEL_ID }}
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Download the checkpoint
+        if: steps.model-cache.outputs.cache-hit != 'true'
+        run: huggingface-cli download ${{ env.MODEL_ID }} --local-dir ${{ env.MODEL_DIR }}
+
+      - name: Generate a 5-prompt parity_data
+        run: python scripts/parity.py --model ${{ env.MODEL_DIR }} --prompts 5 --n-tokens 16
+
+      - name: Configure
+        run: cmake -B build-release -DCMAKE_BUILD_TYPE=Release -DINFERNO_NATIVE=OFF
+
+      - name: Build
+        run: cmake --build build-release --parallel --target inferno
+
+      - name: Parity smoke
+        run: ./build-release/inferno parity --model ${{ env.MODEL_DIR }} --data parity_data --prompts 5

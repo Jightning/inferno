@@ -60,6 +60,7 @@ add_executable(inferno_tests
     tests/tokenizer/bpe.cpp
     tests/tokenizer/tokenizer.cpp
     tests/kernels/kernels.cpp
+    tests/model/model.cpp
     ${INFERNO_SOURCES}
 )
 
