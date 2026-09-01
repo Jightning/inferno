@@ -42,7 +42,7 @@ jobs:
 
       - name: Download the checkpoint
         if: steps.model-cache.outputs.cache-hit != 'true'
-        run: huggingface-cli download ${{ env.MODEL_ID }} --local-dir ${{ env.MODEL_DIR }}
+        run: hf download ${{ env.MODEL_ID }} --local-dir ${{ env.MODEL_DIR }}
 
       - name: Generate a 5-prompt parity_data
         run: python scripts/parity.py --model ${{ env.MODEL_DIR }} --prompts 5 --n-tokens 16
