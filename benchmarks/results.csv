@@ -1,0 +1,2 @@
+git_hash,date,config,threads,prefill_tps,decode_tps,peak_rss_mb,notes
+8fea8f6,2026-09-12,fp32-nocache,1,6.49,0.05,2342,"M9 baseline: fp32 weights, no KV cache, single thread, scalar kernels; macOS arm64 M4 Pro, clang -O3 -march=native"

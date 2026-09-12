@@ -43,6 +43,11 @@ set(INFERNO_SOURCES
     src/kernels/kernels.cpp
 
     src/model/model.cpp
+
+    src/commands/args.cpp
+    src/commands/generate.cpp
+    src/commands/parity.cpp
+    src/commands/bench.cpp
 )
 add_executable(inferno src/main.cpp ${INFERNO_SOURCES})
 target_include_directories(inferno PRIVATE src)
@@ -61,6 +66,7 @@ add_executable(inferno_tests
     tests/tokenizer/tokenizer.cpp
     tests/kernels/kernels.cpp
     tests/model/model.cpp
+    tests/commands/bench.cpp
     ${INFERNO_SOURCES}
 )
 

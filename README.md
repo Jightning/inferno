@@ -13,6 +13,15 @@ python scripts/parity.py --model models/qwen2.5-0.5b-instruct --out parity_data
 Expected output: `parity_data/` containing `prompt_logits.npy`
 (float32, `[128, vocab]`, ~1.5 GB total)
 
+## Benchmarking
+
+For the release build only.
+A 68 token prompt is sent for 128 decode tokens with a median of 3 runs after a warm-up (which doesn't get used).
+
+```bash
+./build-release/inferno bench --model models/qwen2.5-0.5b-instruct --config fp32-nocache --notes "what changed"
+```
+
 ## Build for debug
 
 `/third_party` folder used to manage libraries.

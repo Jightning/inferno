@@ -1,7 +1,11 @@
 {
     "cSpell.words": [
+        "DCMAKE",
         "logit",
+        "mmap",
+        "nocache",
         "numel",
+        "pretokenize",
         "Qwen",
         "rmsnorm",
         "silu",
