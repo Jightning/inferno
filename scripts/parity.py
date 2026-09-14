@@ -13,7 +13,7 @@ from pathlib import Path
 try:
     import numpy as np
     import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 except ImportError as e:
     sys.exit(f"missing dependency: {e.name}. Run the environment setup in docs/setup.md first.")
 
@@ -94,6 +94,14 @@ def main():
     model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.float32)
     model.eval()
 
+    greedy = GenerationConfig(
+        do_sample=False,
+        repetition_penalty=1.0,
+        max_new_tokens=args.n_tokens,
+        eos_token_id=model.config.eos_token_id,
+        pad_token_id=tokenizer.eos_token_id,
+    )
+
     args.out.mkdir(parents=True, exist_ok=True)
 
     if args.dump_intermediates:
@@ -106,10 +114,7 @@ def main():
         result = model.generate( # pyright: ignore[reportAttributeAccessIssue]
             input_ids,
             attention_mask=encoding.attention_mask,
-            pad_token_id=tokenizer.eos_token_id,
-            max_new_tokens=args.n_tokens,
-            min_new_tokens=args.n_tokens,
-            do_sample=False,
+            generation_config=greedy,
             return_dict_in_generate=True,
             output_logits=True,
         )
@@ -119,13 +124,14 @@ def main():
         # output_text = tokenizer.decode(output_ids, skip_special_tokens=True)
         
         # Making sure the generation followed the constraints
-        assert logits.shape[0] == args.n_tokens, f"[{i}] Logits length doesn't match expected number of tokens: ({logits.shape})."
-        assert len(output_ids) == input_ids.shape[1] + args.n_tokens, f"[{i}] Sequence length doesn't match expected number of input and output tokens: ({output_ids.shape})."
+        assert 0 < logits.shape[0] <= args.n_tokens, f"[{i}] Logits length isn't within the requested number of tokens: ({logits.shape})."
+        assert len(output_ids) == input_ids.shape[1] + logits.shape[0], f"[{i}] Sequence length doesn't match the input tokens plus the tokens actually generated: ({output_ids.shape})."
         assert (logits.argmax(axis=1) == output_ids[input_ids.shape[1]:]).all(), f"[{i}] No temperature expected. Option other than the highest probability token use in output."
 
         np.save(args.out / f"prompt{i:02d}_logits.npy", logits)
         np.save(args.out / f"prompt{i:02d}_tokens.npy", output_ids)
-        print(f"[{i + 1:2d}/{len(prompts)}] {len(output_ids)} ids, logits {logits.shape}: {prompt[:50]!r}")
+        stopped = " (stopped at EOS)" if logits.shape[0] < args.n_tokens else ""
+        print(f"[{i + 1:2d}/{len(prompts)}] {len(output_ids)} ids, logits {logits.shape}{stopped}: {prompt[:50]!r}")
 
     manifest = {
         "model": args.model,

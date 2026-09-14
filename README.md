@@ -59,14 +59,11 @@ python scripts/fixtures.py
 
 ## Download for Qwen2.5-0.5B-Instruct
 
-```bash
-wget -P models/qwen2.5-0.5b-instruct https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/resolve/main/model.safetensors
-wget -P models/qwen2.5-0.5b-instruct https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/resolve/main/tokenizer.json
-wget -P models/qwen2.5-0.5b-instruct https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/resolve/main/config.json
-```
+Same command CI runs, so the local model directory matches CI's exactly. Fetching only
+a subset of the repo is what previously hid a bug: the checkpoint also ships a
+`generation_config.json` (chat sampling defaults, `repetition_penalty` among them) that
+changes what `scripts/parity.py` generates.
 
-```zsh
-curl -sL -o models/qwen2.5-0.5b-instruct/config.json https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/resolve/main/config.json;
-curl -sL -o models/qwen2.5-0.5b-instruct/tokenizer.json https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/resolve/main/tokenizer.json;
-curl -sL -o models/qwen2.5-0.5b-instruct/model.safetensors https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/resolve/main/model.safetensors;
+```bash
+hf download Qwen/Qwen2.5-0.5B-Instruct --local-dir models/qwen2.5-0.5b-instruct
 ```
